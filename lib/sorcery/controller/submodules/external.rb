@@ -58,14 +58,19 @@ module Sorcery
           def login_regular_from(provider)
             provider = provider.to_sym
             @provider = Config.send(provider)
-            @provider.process_callback(params,session)
             @user_hash = @provider.get_user_hash
             Rails.logger.info "#############################"
             Rails.logger.info @user_hash.inspect
-            if user = user_class.find_by_email(@user_hash[:user_info]["email"])
+            config = user_class.sorcery_config
+            @user = user_class.find_by_email(@user_hash[:user_info]["email"])
+            auth = user_class.load_from_provider(provider,@user_hash[:uid].to_s)
+            if @user && !auth
+              user_class.transaction do
+                user_class.sorcery_config.authentications_class.create!({config.authentications_user_id_attribute_name => @user.id, config.provider_attribute_name => provider, config.provider_uid_attribute_name => @user_hash[:uid]})
+              end
               reset_session
-              auto_login(user)
-              user
+              auto_login(@user)
+              @user
             end
           end
 
