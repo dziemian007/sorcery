@@ -56,7 +56,6 @@ module Sorcery
 
           # login from provider if user have regular account
           def login_regular_from(provider)
-            provider = provider.to_sym
             @provider = Config.send(provider)
             @user_hash = @provider.get_user_hash
             Rails.logger.info "#############################"
