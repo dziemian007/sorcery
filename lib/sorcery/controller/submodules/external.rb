@@ -48,6 +48,15 @@ module Sorcery
             Rails.logger.info "#############################"
             Rails.logger.info @user_hash.inspect
             if user = user_class.load_from_provider(provider,@user_hash[:uid].to_s)
+              if (user.email.blank? || user.email.index("@").nil?) && @user_hash[:user_info].has_key?("email")
+                user.update_attribute(:email, @user_hash[:user_info]["email"])
+              end
+              if user.gender.blank? && @user_hash[:user_info].has_key?("gender")
+                user.update_attribute(:gender, @user_hash[:user_info]["gender"])
+              end
+              if user.birthday.blank? && @user_hash[:user_info].has_key?("birthday")
+                user.update_attribute(:birthday, Date.strptime(@user_hash[:user_info]["birthday"], "%m/%d/%Y"))
+              end
               reset_session
               auto_login(user)
               user
@@ -102,9 +111,16 @@ module Sorcery
             @provider.user_info_mapping.each do |k,v|
               if (varr = v.split("/")).size > 1
                 attribute_value = varr.inject(@user_hash[:user_info]) {|hsh,v| hsh[v] } rescue nil
+                if attribute_value && k == "birthday"
+                  attribute_value = Date.strptime(attribute_value, "%m/%d/%Y")
+                end
                 attribute_value.nil? ? attrs : attrs.merge!(k => attribute_value)
               else
-                attrs.merge!(k => @user_hash[:user_info][v])
+                if k.to_s == "birthday"
+                  attrs.merge!(k => Date.strptime(@user_hash[:user_info][v], "%m/%d/%Y"))
+                else
+                  attrs.merge!(k => @user_hash[:user_info][v])
+                end
               end
             end
             user_class.transaction do
