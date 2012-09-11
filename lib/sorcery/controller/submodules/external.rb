@@ -48,6 +48,9 @@ module Sorcery
             Rails.logger.info "#############################"
             Rails.logger.info @user_hash.inspect
             if user = user_class.load_from_provider(provider,@user_hash[:uid].to_s)
+              if user.name.blank? && @user_hash[:user_info].has_key?("name")
+                user.update_attribute(:name, @user_hash[:user_info]["name"])
+              end
               if (user.email.blank? || user.email.index("@").nil?) && @user_hash[:user_info].has_key?("email")
                 user.update_attribute(:email, @user_hash[:user_info]["email"])
               end
@@ -56,6 +59,9 @@ module Sorcery
               end
               if user.birthday.blank? && @user_hash[:user_info].has_key?("birthday")
                 user.update_attribute(:birthday, Date.strptime(@user_hash[:user_info]["birthday"], "%m/%d/%Y"))
+              end
+              if user.city.blank? && @user_hash[:user_info].has_key?("location")
+                user.update_attribute(:city, @user_hash[:user_info]["location"])
               end
               reset_session
               auto_login(user)
