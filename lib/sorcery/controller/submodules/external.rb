@@ -60,9 +60,6 @@ module Sorcery
               if user.birthday.blank? && @user_hash[:user_info].has_key?("birthday")
                 user.update_attribute(:birthday, Date.strptime(@user_hash[:user_info]["birthday"], "%m/%d/%Y"))
               end
-              if user.city.blank? && @user_hash[:user_info].has_key?("location")
-                user.update_attribute(:city, @user_hash[:user_info]["location"])
-              end
               reset_session
               auto_login(user)
               user

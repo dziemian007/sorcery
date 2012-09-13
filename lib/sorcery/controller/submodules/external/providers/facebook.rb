@@ -43,7 +43,7 @@ module Sorcery
                 def init
                   @site           = "https://graph.facebook.com"
                   @user_info_path = "/me"
-                  @scope          = "email,offline_access,user_birthday"
+                  @scope          = "email,offline_access,user_birthday,user_about_me"
                   @user_info_mapping = {}
                   @display        = "page"
                   @token_url      = "oauth/access_token"
